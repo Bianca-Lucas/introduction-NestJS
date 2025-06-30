@@ -1,0 +1,10 @@
+services:
+  postgres:
+    image: postgres
+    container_name: postgresdb
+    environment:
+      POSTGRES_USER: biancadb
+      POSTGRES_PASSWORD: bianca-dev 
+      POSTGRES_DB: nestdb
+    ports:
+      - "5432:5432"
