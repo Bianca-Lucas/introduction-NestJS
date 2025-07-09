@@ -11,6 +11,13 @@ async function bootstrap() {
     .setDescription('Documentação da API de usuários com NestJS + Prisma + Swagger')
     .setVersion('1.0')
     .addTag('users')
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+      name: 'Authorization',
+      in: 'header'
+    })
     .build()
 
   const document = SwaggerModule.createDocument(app, config)

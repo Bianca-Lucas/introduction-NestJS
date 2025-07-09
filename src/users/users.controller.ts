@@ -1,30 +1,35 @@
-import { Body, Controller, Get, Param, Post, Put, Delete} from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Put, Delete, UseGuards} from "@nestjs/common";
 import { User } from "@prisma/client";
 import { UsersService } from "./users.service";
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/uptade-user.dto";
+import { JwtAuthGuard } from "src/auth/jwt.guard";
+import { TuristaGuard } from "src/auth/turista.guard";
+import { AdminGuard } from "src/auth/admin.guard";
 
-@Controller('/user')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@Controller('user')
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
-    @Post()
-    @ApiOperation({ summary: 'Criar um novo usuário' })
-    @ApiBody({ type: CreateUserDto })
-    @ApiResponse({ status: 201, description: 'Usuário criado com sucesso.' })
-    create(@Body() data: CreateUserDto) {
-    return this.usersService.create(data);
-    }
+    // @Post()
+    // @ApiOperation({ summary: 'Criar um novo usuário' })
+    // @ApiBody({ type: CreateUserDto })
+    // @ApiResponse({ status: 201, description: 'Usuário criado com sucesso.' })
+    // create(@Body() data: CreateUserDto) {
+    // return this.usersService.create(data);
+    // }
 
-    @Get('/users')
+    @Get('users')
     @ApiOperation({ summary: 'Listar todos os usuários' })
     @ApiResponse({ status: 200, description: 'Lista de usuários retornada com sucesso.' })
     findAll() {
         return this.usersService.findAll()
     }
 
-    @Get('/:id')
+    @Get(':id')
     @ApiOperation({ summary: 'Buscar um usuário por ID' })
     @ApiResponse({ status: 200, description: 'Usuário encontrado.' })
     @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
@@ -33,7 +38,7 @@ export class UsersController {
         return this.usersService.findOne(id)
     }
 
-    @Put('/:id')
+    @Put(':id')
     @ApiOperation({ summary: 'Atualizar um usuário' })
     @ApiResponse({ status: 200, description: 'Usuário atualizado com sucesso.' })
     @ApiParam({ name: 'id', type: String, description: 'ID do usuário' })
@@ -42,7 +47,7 @@ export class UsersController {
         return this.usersService.UpdateUser(id, data)
     }
 
-    @Delete('/:id')
+    @Delete(':id')
     @ApiOperation({ summary: 'Remover um usuário' })
     @ApiResponse({ status: 200, description: 'Usuário removido com sucesso.' })
     @ApiParam({ name: 'id', type: String, description: 'ID do usuário' })
