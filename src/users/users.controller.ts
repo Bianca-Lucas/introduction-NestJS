@@ -4,9 +4,9 @@ import { UsersService } from "./users.service";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/uptade-user.dto";
-import { JwtAuthGuard } from "src/auth/jwt.guard";
-import { TuristaGuard } from "src/auth/turista.guard";
-import { AdminGuard } from "src/auth/admin.guard";
+import { JwtAuthGuard } from "../auth/jwt.guard";
+import { TuristaGuard } from "../auth/turista.guard";
+import { AdminGuard } from "../auth/admin.guard";
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -14,13 +14,13 @@ import { AdminGuard } from "src/auth/admin.guard";
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
-    // @Post()
-    // @ApiOperation({ summary: 'Criar um novo usuário' })
-    // @ApiBody({ type: CreateUserDto })
-    // @ApiResponse({ status: 201, description: 'Usuário criado com sucesso.' })
-    // create(@Body() data: CreateUserDto) {
-    // return this.usersService.create(data);
-    // }
+    @Post()
+    @ApiOperation({ summary: 'Criar um novo usuário' })
+    @ApiBody({ type: CreateUserDto })
+    @ApiResponse({ status: 201, description: 'Usuário criado com sucesso.' })
+    create(@Body() data: CreateUserDto) {
+    return this.usersService.create(data);
+    }
 
     @Get('users')
     @ApiOperation({ summary: 'Listar todos os usuários' })
