@@ -4,7 +4,8 @@ import { CloudinaryService } from './cloudinary.service';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { File as MulterFile } from 'multer'
+// import { File as MulterFile } from 'multer'
+import { Express } from 'express'; 
 import { UpdatePlaceDto } from './dto/uptade-place.dto';
 
 @Controller('places')
@@ -18,6 +19,15 @@ export class PlaceController {
     @ApiOperation({summary: 'Listar todos os locais'})
     findAll(){
         return this.placeService.findAll()
+    }
+
+    @Get('paginated')
+    @ApiOperation({summary: 'Listar locais paginados'})
+    findPaginated(
+        @Param('page') page: number = 1,
+        @Param('limit') limit: number = 10
+    ) {
+        return this.placeService.findPaginated(page, limit);
     }
 
     @Post()
@@ -49,7 +59,7 @@ export class PlaceController {
     @ApiResponse({status: 201, description: 'Place criado com sucesso'})
     async create(
         @Body() data: CreatePlaceDto,
-        @UploadedFiles() files: {images?: MulterFile[]},
+        @UploadedFiles() files: {images?: Express.Multer.File[]},
     ) {
         if(!files.images || files.images.length === 0) {
             throw new BadRequestException('Pelo menos uma imagem deve ser enviada')
@@ -94,7 +104,7 @@ export class PlaceController {
     async updatePlace(
         @Param('id') id: string,
         @Body() data: UpdatePlaceDto,
-        @UploadedFiles() files: {images?: MulterFile[]}
+        @UploadedFiles() files: {images?: Express.Multer.File[]}
     ) {
         const newImages = files.images?.map(file => file.buffer)
         return this.placeService.update(id, data, newImages)

@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CloudinaryService } from './cloudinary.service';
 import { ImageObject } from './types/image-object';
 import { Place } from '@prisma/client';
@@ -9,41 +9,59 @@ export class PlaceService {
     constructor(
         private prisma: PrismaService,
         private cloudinaryService: CloudinaryService
-    ) {}
+    ) { }
 
-    async findAll(){
+    async findAll() {
         return this.prisma.place.findMany()
     }
 
-    async create(data: {name: string, type: any, phone: string, latitude: number, longitude: number, images: ImageObject[]}){
-        return this.prisma.place.create({data})
+    async findPaginated(page: number, limit: number) {
+        const [places, total] = await Promise.all([
+            this.prisma.place.findMany({
+                skip: (page - 1) * limit,
+                take: limit,
+            }),
+            this.prisma.place.count()
+        ]);
+
+        return {
+            data: places,
+            total,
+            page,
+            last_page: Math.ceil(total / limit)
+        };
     }
 
-    async update(id: string, data: Partial<Place>, newImages?: Buffer[]): Promise <Place> {
-        const place = await this.prisma.place.findUnique({where: {id}})
+
+    async create(data: { name: string, type: any, phone: string, latitude: number, longitude: number, images: ImageObject[] }) {
+        return this.prisma.place.create({ data })
+    }
+
+    async update(id: string, data: Partial<Place>, newImages?: Buffer[]): Promise<Place> {
+        const place = await this.prisma.place.findUnique({ where: { id } })
         if (!place) throw new BadRequestException('Local não encontrado')
 
         let images = place.images as ImageObject[]
 
-        if (newImages && newImages.length > 0){
+        if (newImages && newImages.length > 0) {
             await Promise.all(images.map(img => this.cloudinaryService.deleteImage(img.public_id)))
-            images = await Promise.all(newImages.map (file => this.cloudinaryService.uploadImage(file)))
+            images = await Promise.all(newImages.map(file => this.cloudinaryService.uploadImage(file)))
         }
 
         return this.prisma.place.update({
-            where: {id},
+            where: { id },
             data: {
                 ...data,
-                ...newImages ? { images: JSON.parse(JSON.stringify(images))} : {}
+                ...newImages ? { images: JSON.parse(JSON.stringify(images)) } : {}
             }
         })
     }
 
-    async delete(id: string): Promise <void> {
-        const place = await this.prisma.place.findUnique({where: {id}})
+    async delete(id: string): Promise<void> {
+        const place = await this.prisma.place.findUnique({ where: { id } })
         if (!place) throw new BadRequestException('Local não encontrado')
         const images = place.images as ImageObject[]
         await Promise.all(images.map(img => this.cloudinaryService.deleteImage(img.public_id)))
-        await this.prisma.place.delete({where: {id}})
+        await this.prisma.place.delete({ where: { id } })
     }
 }
