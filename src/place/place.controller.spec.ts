@@ -113,7 +113,6 @@ describe('PlaceController', () => {
             phone: '(88) 99999-9999',
             latitude: -3.7327,
             longitude: -38.5267,
-            createdAt: new Date(),
         };
 
         const files = {
@@ -138,9 +137,14 @@ describe('PlaceController', () => {
                 { public_id: 'image1', url: imageUrls[0] },
                 { public_id: 'image2', url: imageUrls[1] },
             ],
+            createdAt: new Date(),
         });
 
         const result = await controller.create(createPlaceDto, files);
+
+        expect(cloudinaryService.uploadImage).toHaveBeenCalledTimes(2);
+        expect(cloudinaryService.uploadImage).toHaveBeenCalledWith(files.images[0].buffer);
+        expect(cloudinaryService.uploadImage).toHaveBeenCalledWith(files.images[1].buffer);
 
         expect(result).toEqual({
             id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13',
